@@ -1,0 +1,12 @@
+{
+  "name": "@cybeings/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo \"[web] not set up yet — see task F0-T3\"",
+    "build": "echo \"[web] build not set up yet\"",
+    "lint": "echo \"[web] no lint yet\"",
+    "type-check": "echo \"[web] no type-check yet\"",
+    "test": "echo \"[web] no tests yet\""
+  }
+}

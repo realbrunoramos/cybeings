@@ -1,0 +1,12 @@
+{
+  "name": "@cybeings/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo \"[api] not set up yet — see task F0-T4\"",
+    "build": "echo \"[api] build not set up yet\"",
+    "lint": "echo \"[api] no lint yet\"",
+    "type-check": "echo \"[api] no type-check yet\"",
+    "test": "echo \"[api] no tests yet\""
+  }
+}
