@@ -2,8 +2,12 @@
   "name": "cybeings",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@9.0.0",
-  "engines": { "node": ">=20" },
+  "description": "Web3 + AI platform for unique AI-powered digital beings",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
   "scripts": {
     "dev": "pnpm -r --parallel dev",
     "build": "pnpm -r build",
@@ -12,7 +16,6 @@
     "test": "pnpm -r test"
   },
   "devDependencies": {
-    "typescript": "^5.4.0",
-    "prettier": "^3.2.0"
+    "typescript": "^5.7.2"
   }
 }
