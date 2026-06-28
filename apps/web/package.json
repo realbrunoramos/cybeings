@@ -1,12 +1,28 @@
-{ 
+{
   "name": "@cybeings/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "echo \"[web] not set up yet — see task F0-T3\"",
-    "build": "echo \"[web] build not set up yet\"",
-    "lint": "echo \"[web] no lint yet\"",
-    "type-check": "echo \"[web] no type-check yet\"",
-    "test": "echo \"[web] no tests yet\""
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "14.2.15",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.2.15",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.13",
+    "typescript": "^5.7.2"
   }
 }
