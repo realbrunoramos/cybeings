@@ -1,0 +1,11 @@
+{
+  "name": "@cybeings/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "echo \"[contracts] not set up yet — see task F0-T8\"",
+    "test": "echo \"[contracts] no tests yet\"",
+    "lint": "echo \"[contracts] no lint yet\"",
+    "type-check": "echo \"[contracts] no type-check yet\""
+  }
+}
