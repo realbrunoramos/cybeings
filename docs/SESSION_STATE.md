@@ -1,119 +1,161 @@
-# Cybeings — Session State
+# Cybeings — Estado da Sessão
 
-Last updated: June 2026 — Session #2
+Última actualização: 28 Junho 2026
 
-Session #: 2
+Sessão #: 2
 
-Current phase: Phase 0 — Foundations
-
----
-
-## Current State
-
-The repository is live and private at github.com/realbrunoramos/cybeings. The monorepo skeleton is in place: pnpm workspaces configured, five workspace packages scaffolded (web, api, contracts, shared, ui), base config files created, and the environment template defined. No application code or framework setup yet — those come in the next Phase 0 tasks.
+Fase actual: Fase 0 — Fundações
 
 ---
 
-## What Was Done (last 3 sessions)
+## Estado Geral
 
-### Session #2 — June 2026
-
-- Created private GitHub repository cybeings
-
-- Scaffolded monorepo structure with pnpm workspaces (apps/* + packages/*)
-
-- Added root config: package.json, pnpm-workspace.yaml, tsconfig.base.json, .prettierrc, .gitignore
-
-- Created .env.example with all required service variables
-
-- Added CLAUDE.md and this SESSION_STATE.md to docs
-
-### Session #1 — June 2026
-
-- Full product concept defined for Cybeings
-
-- Complete technical architecture documented
-
-- Stack decided: Next.js + Fastify + Supabase + Upstash + Atlas + Alchemy + wagmi/RainbowKit
-
-- Brand book created (Bioluminescent Dark identity)
-
-- Key decisions: USDC default currency, flag is user-submitted 370x370px PNG, no biomes, $CBEINGS deferred to Phase 4
+Fundação técnica em marcha. O repositório existe, o monorepo está montado, e o
+frontend (landing page com a identidade visual completa) está EM PRODUÇÃO na
+Vercel, com deploy automático a cada push para main. F0-T1 (estrutura) e F0-T3
+(frontend) concluídas. Ainda não há backend, base de dados, nem smart contracts.
 
 ---
 
-## In Progress
+## O que foi feito (histórico das últimas sessões)
 
-Task: F0-T1 — Repository and base structure (completing)
+### Sessão #2 — 28 Junho 2026
 
-Files modified: root config files, workspace package.json stubs, docs
+- Repositório realbrunoramos/cybeings criado (privado)
 
-State: Skeleton committed. Next: add full architecture.md to docs, then move to F0-T2 (devcontainer).
+- F0-T1 concluída: monorepo pnpm (apps/web, apps/api, packages/shared, packages/ui, packages/contracts)
 
-Active branch: main (bootstrap commit only; feature branches from here on)
+- Ficheiros de raiz: package.json, pnpm-workspace.yaml, .npmrc, .nvmrc, .gitignore, tsconfig.base.json, .env.example, README.md, CLAUDE.md
 
-Exact next step: Add docs/architecture.md, then configure .devcontainer/devcontainer.json for GitHub Codespaces.
+- F0-T3 concluída: frontend Next.js 14 + Tailwind com tokens Cybeings, fontes Syne/Space Grotesk/Space Mono, landing page (hero + 4 pilares + footer)
 
----
+- Deploy do frontend na Vercel (parte de F0-T10 adiantada): Root Directory = apps/web
 
-## Next Steps (ordered by priority)
+- Relatório de auditoria gerado em docs/PROGRESS_REPORT.md
 
-1. Add docs/architecture.md (full technical reference) to the repo
+- Validado: extensão do Chrome consegue ler/criar/substituir ficheiros e commitar em main
 
-2. F0-T2 — Configure .devcontainer/devcontainer.json for GitHub Codespaces
+- Validado: deploy automático Vercel ligado ao GitHub (push em main → republica)
 
-3. F0-T3 — Set up Next.js 14 in apps/web (App Router, Tailwind, Cybeings palette + fonts)
+### Sessão #1 — Junho 2026
 
-4. F0-T4 — Set up Fastify in apps/api (health check, module structure)
+- Definição completa do conceito de produto Cybeings
 
----
+- Arquitectura técnica completa documentada em /docs/architecture.md
 
-## Technical Decisions Log (permanent)
-
-| Date | Decision | Justification |
-
-|------|----------|---------------|
-
-| Jun 2026 | Repository is private | Develop privately until Phase 1 MVP is presentable |
-
-| Jun 2026 | Initial scaffold committed directly to main | Bootstrap exception; feature branches used from now on |
-
-| Jun 2026 | Stack locked: Next.js 14 + Fastify + Supabase + Upstash + Atlas | Performance, ecosystem, cost, DX |
-
-| Jun 2026 | Flag: 370x370px PNG, user-submitted, separate NFT | Unique identity, never AI-generated |
-
-| Jun 2026 | Default currency: USDC | Price stability for stakes and transactions |
-
-| Jun 2026 | $CBEINGS token: Phase 4 only | Reduce initial complexity |
+- Stack decidida e ficheiros master criados
 
 ---
 
-## Known Issues / Blockers
+## Em Curso
 
-- None yet — project bootstrapping.
+Tarefa: Nada a meio — sessão fechada num ponto limpo após guardar progresso.
+
+Ficheiros modificados: todos commitados.
+
+Estado: F0-T1 e F0-T3 concluídas; frontend ao vivo.
+
+Branch activa: main
+
+Próximo passo concreto: F0-T4 — setup do backend Fastify (health check + estrutura de módulos), OU continuar a enriquecer o frontend. Decisão do fundador.
 
 ---
 
-## Environment Configuration
+## Próximos Passos (ordenados por prioridade)
 
-Repository: github.com/realbrunoramos/cybeings (private)
+1. F0-T4 — Setup Fastify API (TypeScript strict, GET /health, módulos auth/island/cybeing/tournament/marketplace, CORS + rate limiting + logging)
 
-Main branch: main
+2. F0-T2 — GitHub Codespaces (.devcontainer com Node 20, pnpm, port forwarding 3000/4000)
 
-Current working branch: main
+3. F0-T5 — Supabase/PostgreSQL: schema Prisma completo + primeira migração (requer criar conta Supabase)
 
-Frontend deploy: not configured yet (Vercel)
+4. F0-T6 — Upstash Redis · F0-T7 — MongoDB Atlas (requer criar contas)
 
-Backend deploy: not configured yet (Railway)
+5. F0-T9 — GitHub Actions CI/CD (lint + type-check + build em cada PR)
 
-Active chain: Sepolia testnet (chain ID 11155111; switch to mainnet in Phase 2)
+6. F0-T10 — Deploy backend em Railway (requer criar conta Railway)
 
-Deployed contracts:
+7. F0-T8 — Smart contracts em Sepolia testnet (requer conta Alchemy + wallet de teste)
 
-  - Island: not deployed yet
+---
 
-  - Flag: not deployed yet
+## Decisões Técnicas Tomadas (permanente)
 
-  - Cybeing: not deployed yet
+| Data | Decisão | Justificação |
+|------|---------|--------------|
+| Jun 2026 | Stack: Next.js 14 + Fastify + Supabase + Upstash + Atlas | Performance, ecossistema, custo, DX |
+| Jun 2026 | Blockchain: Ethereum EVM via Alchemy | Credibilidade, ecossistema NFT, MetaMask nativo |
+| Jun 2026 | Wallets: MetaMask + Coinbase + WalletConnect | Cobertura máxima de utilizadores |
+| Jun 2026 | Auth: SIWE (Sign-In With Ethereum) | Padrão da indústria, sem passwords |
+| Jun 2026 | Bandeira: PNG 370×370px obrigatório, token NFT | Identidade única, não gerada |
+| Jun 2026 | Biomas: eliminados — foto de capa submetida pelo utilizador | Mais autêntico, infinitamente variável |
+| Jun 2026 | Token $CBEINGS: Fase 2 | Reduz complexidade inicial, cresce com a comunidade |
+| Jun 2026 | Moeda padrão: USDC | Estabilidade, sem volatilidade para apostas |
+| Jun 2026 | Geração de imagens: Stable Diffusion XL via Replicate | Pay-per-use, qualidade, API simples |
+| Jun 2026 | Storage NFT: IPFS via Pinata | Descentralizado, permanente, padrão da indústria |
+| Jun 2026 | Storage UI: Cloudinary | Transformações automáticas, moderação, CDN |
+| Jun 2026 | Tailwind v3.4 + tokens em CSS variables | Estável, previsível, fiel ao brandbook |
+| Jun 2026 | Next.js 14.2 + React 18 (App Router) | Versões estáveis, bem suportadas pela Vercel |
+| Jun 2026 | Deploy frontend: Vercel, Root Directory = apps/web | Monorepo: Vercel precisa do path do app |
 
-  - Market: not deployed yet
+---
+
+## Problemas Conhecidos / Blockers
+
+- Nenhum bloqueador activo.
+
+- Nota: o URL de produção Vercel pode pedir login a terceiros por o repositório ser privado (Deployment Protection). Normal nesta fase.
+
+---
+
+## Configuração do Ambiente
+
+Repositório: github.com/realbrunoramos/cybeings (privado)
+
+Branch principal: main
+
+Branch de trabalho actual: main
+
+Deploy frontend: Vercel — AO VIVO. Root Directory = apps/web. Redeploy automático a cada push para main.
+
+URL de deploy (exemplo): https://cybeings-47trqeakw-ramosbrunopina-9658s-projects.vercel.app (URL de produção estável no painel Vercel)
+
+Deploy backend: a configurar (Railway)
+
+Chain activa: Sepolia testnet (mudar para mainnet na Fase 2)
+
+Contratos deployed:
+
+- Island: não deployed ainda
+
+- Cybeing: não deployed ainda
+
+- Flag: não deployed ainda
+
+- Market: não deployed ainda
+
+---
+
+## Credenciais e Acessos (NUNCA valores reais aqui — só referências)
+
+- Variáveis de ambiente: ver .env.example no repo + GitHub Secrets (a configurar)
+
+- GitHub: realbrunoramos (conta activa)
+
+- Vercel: ligada via GitHub (conta activa) — projecto cybeings importado
+
+- Supabase: a criar em supabase.com
+
+- Railway: a criar em railway.app
+
+- Alchemy: a criar em alchemy.com
+
+- Upstash: a criar em upstash.com
+
+- MongoDB Atlas: a criar em mongodb.com/atlas
+
+- Pinata: a criar em pinata.cloud
+
+- Cloudinary: a criar em cloudinary.com
+
+- Resend: a criar em resend.com
