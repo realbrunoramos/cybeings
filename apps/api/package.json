@@ -2,11 +2,23 @@
   "name": "@cybeings/api",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "echo \"[api] not set up yet — see task F0-T4\"",
-    "build": "echo \"[api] build not set up yet\"",
-    "lint": "echo \"[api] no lint yet\"",
-    "type-check": "echo \"[api] no type-check yet\"",
-    "test": "echo \"[api] no tests yet\""
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint src --ext .ts",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.0",
+    "@fastify/rate-limit": "^10.0.0",
+    "fastify": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "pino-pretty": "^13.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
   }
 }
