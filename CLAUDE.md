@@ -72,6 +72,12 @@ Sempre actualizar /docs/SESSION_STATE.md e fazer commit:
 docs: update session state — [data] — [resumo em 1 linha]
 ```
 
+## Environment notes
+
+- `pnpm` is installed at `/opt/homebrew/bin/pnpm` and is not on the default PATH in the Claude Code shell.
+- Every command that uses `pnpm` (or `node`, `npx`, `tsc`) must be prefixed with `export PATH="/opt/homebrew/bin:$PATH"`, or chained: `export PATH="/opt/homebrew/bin:$PATH" && pnpm …`
+- Git remote is SSH: `git@github.com:realbrunoramos/cybeings.git` — SSH key `~/.ssh/id_ed25519` is configured and working.
+
 ## Referência completa
 
 Ver /docs/architecture.md para arquitectura completa, schema da BD, fluxos e estimativas.
