@@ -77,6 +77,7 @@ docs: update session state — [data] — [resumo em 1 linha]
 - `pnpm` is installed at `/opt/homebrew/bin/pnpm` and is not on the default PATH in the Claude Code shell.
 - Every command that uses `pnpm` (or `node`, `npx`, `tsc`) must be prefixed with `export PATH="/opt/homebrew/bin:$PATH"`, or chained: `export PATH="/opt/homebrew/bin:$PATH" && pnpm …`
 - Git remote is SSH: `git@github.com:realbrunoramos/cybeings.git` — SSH key `~/.ssh/id_ed25519` is configured and working.
+- Prisma is pinned to v6 (Prisma v7 has known open issues with Supabase). Do not upgrade to v7 without explicit approval.
 
 ## Referência completa
 

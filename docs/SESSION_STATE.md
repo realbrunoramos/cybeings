@@ -19,6 +19,18 @@ Vercel, com deploy automático a cada push para main. F0-T1 (estrutura) e F0-T3
 
 ## O que foi feito (histórico das últimas sessões)
 
+### Sessão #3 — 2 Julho 2026 (em curso)
+
+- F0-T4 concluída: servidor Fastify (CORS, rate limiting, logging, 6 módulos) — commit e965ce3
+
+- Push por SSH configurado (chave ~/.ssh/id_ed25519, remote git@github.com)
+
+- F0-T5 em curso: Prisma fixado na v6 (v7 tem issues abertas com Supabase), ligação à Supabase validada, schema inicial com 10 modelos migrado (migração `init`)
+
+- docs/architecture.md adicionado ao repositório (estava referenciado mas nunca tinha sido commitado)
+
+- docs/PROJECT_INSTRUCTIONS.md passou a v2 — adaptado ao Claude Code (substitui a versão para a extensão do Chrome)
+
 ### Sessão #2 — 28 Junho 2026
 
 - Repositório realbrunoramos/cybeings criado (privado)
