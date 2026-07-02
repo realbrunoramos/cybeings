@@ -1,0 +1,334 @@
+// Prisma schema for the Cybeings API.
+// Source of truth: docs/architecture.md §5.1 (v1.0, June 2026).
+// DATABASE_URL = transaction-mode pooler (runtime) · DIRECT_URL = session-mode pooler (migrations).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── USERS ────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  walletAddress String    @unique
+  username      String?   @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+
+  islands            Island[]
+  cybeings           Cybeing[]
+  listings           Listing[]
+  bids               Bid[]
+  sentChallenges     Tournament[] @relation("Challenger")
+  receivedChallenges Tournament[] @relation("Opponent")
+
+  @@index([walletAddress])
+}
+
+// ─── ISLANDS ──────────────────────────────────────────────────
+
+model Island {
+  id      String @id @default(cuid())
+  name    String
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id])
+
+  // World geometry and position
+  coordX      Float
+  coordY      Float
+  sizeType    IslandSize // SMALL | MEDIUM | LARGE
+  shapeData   Json // Array of points of the randomly generated polygon
+  maxCybeings Int // 5 | 15 | 35
+
+  // Visual identity
+  coverImageUrl String? // IPFS URL of the cover photo
+  coverImageCid String? // IPFS CID
+  flagImageUrl  String? // IPFS URL of the 370x370 flag
+  flagImageCid  String? // IPFS CID
+  flagTokenId   String? // Flag token ID on-chain
+
+  // Metadata
+  purchasePrice  Decimal // Price paid in USDC
+  purchaseTxHash String? // Purchase transaction hash
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  cybeings    Cybeing[]
+  flagHistory FlagHistory[]
+
+  @@index([coordX, coordY]) // Spatial queries by bounds
+  @@index([ownerId])
+}
+
+enum IslandSize {
+  SMALL
+  MEDIUM
+  LARGE
+}
+
+model FlagHistory {
+  id            String   @id @default(cuid())
+  islandId      String
+  island        Island   @relation(fields: [islandId], references: [id])
+  flagUrl       String
+  flagCid       String
+  setAt         DateTime @default(now())
+  previousOwner String?
+}
+
+// ─── CYBEINGS ─────────────────────────────────────────────────
+
+model Cybeing {
+  id       String  @id @default(cuid())
+  tokenId  String  @unique // NFT token ID on-chain
+  ownerId  String
+  owner    User    @relation(fields: [ownerId], references: [id])
+  islandId String?
+  island   Island? @relation(fields: [islandId], references: [id])
+
+  // Identity
+  name     String
+  imageUrl String // IPFS URL of the generated image
+  imageCid String // IPFS CID
+  seed     String // Generation seed (reproducible)
+
+  // Ability
+  abilityType   AbilityType
+  abilityName   String // Descriptive ability name
+  abilityConfig Json // Ability-specific configuration
+
+  // Personality (used as the AI system prompt)
+  personalityTraits Json // Array of traits
+  lore              String? // Generated backstory
+  speechStyle       String? // Speech style
+
+  // Rarity
+  rarityScore Float // 0-100
+  rarityTier  RarityTier // COMMON | UNCOMMON | RARE | EPIC | LEGENDARY
+
+  // Progression
+  level             Int @default(1)
+  xp                Int @default(0)
+  xpToNextLevel     Int @default(100)
+  totalInteractions Int @default(0)
+
+  // State
+  isForSale     Boolean  @default(false)
+  isForRent     Boolean  @default(false)
+  rentPriceHour Decimal?
+  mintTxHash    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  listings          Listing[]
+  tournamentEntries TournamentEntry[]
+  rentals           Rental[]
+
+  @@index([ownerId])
+  @@index([abilityType])
+  @@index([rarityTier])
+  @@index([islandId])
+}
+
+enum AbilityType {
+  WRITING
+  CODE
+  ANALYSIS
+  TRANSLATION
+  SUMMARIZATION
+  IMAGE_DESCRIPTION
+  MATH
+  DEBATE
+  STORYTELLING
+  MUSIC_DESCRIPTION
+  TUTORING
+  COACHING
+}
+
+enum RarityTier {
+  COMMON
+  UNCOMMON
+  RARE
+  EPIC
+  LEGENDARY
+}
+
+// ─── MARKETPLACE ──────────────────────────────────────────────
+
+model Listing {
+  id        String  @id @default(cuid())
+  cybeingId String
+  cybeing   Cybeing @relation(fields: [cybeingId], references: [id])
+  sellerId  String
+  seller    User    @relation(fields: [sellerId], references: [id])
+
+  listingType   ListingType // SALE | RENT
+  priceUsdc     Decimal
+  rentDurationH Int? // Duration in hours (for rentals)
+
+  status  ListingStatus @default(ACTIVE)
+  buyerId String?
+  soldAt  DateTime?
+  txHash  String?
+
+  createdAt DateTime  @default(now())
+  expiresAt DateTime?
+
+  bids Bid[]
+
+  @@index([status])
+  @@index([cybeingId])
+  @@index([listingType])
+}
+
+enum ListingType {
+  SALE
+  RENT
+}
+
+enum ListingStatus {
+  ACTIVE
+  SOLD
+  CANCELLED
+  EXPIRED
+}
+
+model Bid {
+  id         String    @id @default(cuid())
+  listingId  String
+  listing    Listing   @relation(fields: [listingId], references: [id])
+  bidderId   String
+  bidder     User      @relation(fields: [bidderId], references: [id])
+  amountUsdc Decimal
+  status     BidStatus @default(PENDING)
+  createdAt  DateTime  @default(now())
+}
+
+enum BidStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+// ─── TOURNAMENTS ─────────────────────────────────────────────
+
+model Tournament {
+  id             String           @id @default(cuid())
+  title          String
+  abilityType    AbilityType
+  tournamentType TournamentType // DUEL | WEEKLY | MONTHLY | EVENT
+  status         TournamentStatus @default(OPEN)
+
+  challengerId String?
+  challenger   User?   @relation("Challenger", fields: [challengerId], references: [id])
+  opponentId   String?
+  opponent     User?   @relation("Opponent", fields: [opponentId], references: [id])
+
+  challenge     String // The challenge statement
+  prizePoolUsdc Decimal @default(0)
+  platformFee   Decimal @default(0.05) // 5%
+
+  winnerId String?
+  result   Json? // Scores, detailed evaluations
+
+  startedAt DateTime?
+  endedAt   DateTime?
+  createdAt DateTime  @default(now())
+
+  entries TournamentEntry[]
+
+  @@index([status])
+  @@index([abilityType])
+}
+
+model TournamentEntry {
+  id             String     @id @default(cuid())
+  tournamentId   String
+  tournament     Tournament @relation(fields: [tournamentId], references: [id])
+  cybeingId      String
+  cybeing        Cybeing    @relation(fields: [cybeingId], references: [id])
+  stakeUsdc      Decimal
+  output         String? // Output produced by the Cybeing for the challenge
+  aiScore        Float? // Score given by the AI (0-100)
+  communityVotes Int        @default(0)
+  finalScore     Float?
+  placement      Int?
+  createdAt      DateTime   @default(now())
+}
+
+enum TournamentType {
+  DUEL
+  WEEKLY
+  MONTHLY
+  EVENT
+}
+
+enum TournamentStatus {
+  OPEN
+  IN_PROGRESS
+  EVALUATING
+  COMPLETED
+  CANCELLED
+}
+
+// ─── RENTALS ─────────────────────────────────────────────────
+
+model Rental {
+  id        String   @id @default(cuid())
+  cybeingId String
+  cybeing   Cybeing  @relation(fields: [cybeingId], references: [id])
+  renterId  String
+  priceUsdc Decimal
+  startAt   DateTime
+  endAt     DateTime
+  txHash    String?
+  createdAt DateTime @default(now())
+
+  @@index([cybeingId])
+  @@index([renterId])
+}
+
+// ─── TRANSACTIONS ────────────────────────────────────────────
+
+model Transaction {
+  id          String          @id @default(cuid())
+  fromAddress String
+  toAddress   String?
+  type        TransactionType
+  amountUsdc  Decimal?
+  txHash      String          @unique
+  blockNumber BigInt?
+  status      TxStatus        @default(PENDING)
+  metadata    Json?
+  createdAt   DateTime        @default(now())
+  confirmedAt DateTime?
+
+  @@index([fromAddress])
+  @@index([txHash])
+  @@index([status])
+}
+
+enum TransactionType {
+  ISLAND_PURCHASE
+  CYBEING_MINT
+  MARKETPLACE_SALE
+  RENTAL_PAYMENT
+  TOURNAMENT_ENTRY
+  TOURNAMENT_REWARD
+  FLAG_MINT
+}
+
+enum TxStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+}
