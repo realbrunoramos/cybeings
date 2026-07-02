@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import rateLimit from "@fastify/rate-limit";
 import { env } from "./config/env.js";
+import { prismaPlugin } from "./plugins/prisma.js";
 import { healthRoutes } from "./modules/health/health.routes.js";
 import { authRoutes } from "./modules/auth/auth.routes.js";
 import { islandRoutes } from "./modules/island/island.routes.js";
@@ -28,6 +29,8 @@ export async function buildServer() {
     max: 100,
     timeWindow: "1 minute",
   });
+
+  await app.register(prismaPlugin);
 
   await app.register(healthRoutes, { prefix: "/" });
   await app.register(authRoutes, { prefix: "/auth" });
