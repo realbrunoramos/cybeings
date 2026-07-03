@@ -1,23 +1,19 @@
 import type { FastifyInstance } from "fastify";
 
-const DB_CHECK_TIMEOUT_MS = 2_000;
+const CHECK_TIMEOUT_MS = 2_000;
 
-async function checkDatabase(app: FastifyInstance): Promise<"ok" | "down"> {
+async function withTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
   let timer: NodeJS.Timeout | undefined;
   try {
-    await Promise.race([
-      app.prisma.$queryRaw`SELECT 1`,
+    return await Promise.race([
+      promise,
       new Promise<never>((_resolve, reject) => {
         timer = setTimeout(
-          () => reject(new Error("Database health check timed out")),
-          DB_CHECK_TIMEOUT_MS,
+          () => reject(new Error(`${label} health check timed out`)),
+          CHECK_TIMEOUT_MS,
         );
       }),
     ]);
-    return "ok";
-  } catch (err) {
-    app.log.error({ err }, "Database health check failed");
-    return "down";
   } finally {
     if (timer !== undefined) {
       clearTimeout(timer);
@@ -25,22 +21,50 @@ async function checkDatabase(app: FastifyInstance): Promise<"ok" | "down"> {
   }
 }
 
+async function checkDatabase(app: FastifyInstance): Promise<"ok" | "down"> {
+  try {
+    await withTimeout(app.prisma.$queryRaw`SELECT 1`, "Database");
+    return "ok";
+  } catch (err) {
+    app.log.error({ err }, "Database health check failed");
+    return "down";
+  }
+}
+
+async function checkRedis(app: FastifyInstance): Promise<"ok" | "down"> {
+  try {
+    const key = "__health:probe";
+    const value = String(Date.now());
+    await withTimeout(app.redis.set(key, value, { ex: 5 }), "Redis");
+    const stored = await withTimeout(app.redis.get(key), "Redis");
+    return String(stored) === value ? "ok" : "down";
+  } catch (err) {
+    app.log.error({ err }, "Redis health check failed");
+    return "down";
+  }
+}
+
 // Liveness endpoint used by Railway and uptime monitors.
 export async function healthRoutes(app: FastifyInstance): Promise<void> {
   app.get("/health", async (_request, reply) => {
-    const database = await checkDatabase(app);
+    const [database, redisStatus] = await Promise.all([
+      checkDatabase(app),
+      checkRedis(app),
+    ]);
+
+    const allOk = database === "ok" && redisStatus === "ok";
 
     const body = {
-      status: database === "ok" ? "ok" : "degraded",
+      status: allOk ? "ok" : "degraded",
       service: "cybeings-api",
       timestamp: new Date().toISOString(),
-      checks: { database },
+      checks: { database, redis: redisStatus },
     };
 
-    if (database === "down") {
+    if (!allOk) {
       return reply.code(503).send({
         ...body,
-        message: "Database is unreachable.",
+        message: "One or more dependencies are unreachable.",
       });
     }
 

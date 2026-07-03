@@ -6,11 +6,32 @@ function requireEnv(name: string, fallback?: string): string {
   return value;
 }
 
+function requireUpstashUrl(name: string): string {
+  const value = process.env[name];
+  if (value === undefined || value.trim() === "") {
+    throw new Error(`Upstash Redis env vars missing: ${name} is required`);
+  }
+  if (!value.startsWith("https://")) {
+    throw new Error(`Upstash Redis env vars missing: ${name} must start with https://`);
+  }
+  return value;
+}
+
+function requireUpstashToken(name: string): string {
+  const value = process.env[name];
+  if (value === undefined || value.trim() === "") {
+    throw new Error(`Upstash Redis env vars missing: ${name} is required`);
+  }
+  return value;
+}
+
 export const env = {
   PORT: parseInt(requireEnv("PORT", "4000"), 10),
   HOST: requireEnv("HOST", "0.0.0.0"),
   CORS_ORIGINS: requireEnv("CORS_ORIGINS", "http://localhost:3000"),
   NODE_ENV: requireEnv("NODE_ENV", "development"),
+  UPSTASH_REDIS_REST_URL: requireUpstashUrl("UPSTASH_REDIS_REST_URL"),
+  UPSTASH_REDIS_REST_TOKEN: requireUpstashToken("UPSTASH_REDIS_REST_TOKEN"),
 } as const;
 
 export type Env = typeof env;
