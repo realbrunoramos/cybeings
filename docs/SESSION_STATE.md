@@ -1,60 +1,51 @@
 # Cybeings — Estado da Sessão
 
-**Última atualização:** 2 Julho 2026
-**Sessão #:** 3
+**Última atualização:** 3 Julho 2026
+**Sessão #:** 4
 **Fase atual:** Fase 0 — Fundações
 
 ---
 
 ## Estado Geral
 
-Fundações consolidadas. As três camadas principais (frontend, backend, base de dados) estão de pé e a comunicar. O frontend está ao vivo na Vercel; o backend arranca e liga-se à Supabase automaticamente; o schema completo (10 tabelas + 10 enums) está migrado. F0-T1, F0-T3, F0-T4 e F0-T5 concluídas. Frontend de F0-T10 também concluído. Mudança operacional importante nesta sessão: passagem da extensão do Chrome para o Claude Code local, com autenticação SSH configurada.
+Quatro camadas do backend em funcionamento e verificadas ponta-a-ponta: frontend (Vercel), API Fastify, PostgreSQL (Supabase) e Redis (Upstash). O health check da API responde 200 com `checks.database:"ok"` e `checks.redis:"ok"`. F0-T1, F0-T3, F0-T4, F0-T5 e F0-T6 concluídas. Frontend de F0-T10 também concluído. Faltam: F0-T7 (MongoDB), F0-T8 (smart contracts), F0-T9 (CI/CD) e F0-T10 parte 2 (deploy backend em Railway). F0-T2 (Codespaces) fica como opcional / provavelmente saltada.
 
 ---
 
 ## O que foi feito (histórico das últimas sessões)
 
+### Sessão #4 — 3 Julho 2026
+
+**F0-T6 concluída — Upstash Redis integrado no backend:**
+- Cliente `@upstash/redis` singleton em `apps/api/src/lib/redis.ts`
+- Plugin Fastify (`apps/api/src/plugins/redis.ts`) via `fastify-plugin`, com PING de sanidade no boot
+- Health check enriquecido: SET/GET real ao Redis com timeout curto; 200 quando ambos ok, 503 se algum falhar
+- Env `UPSTASH_REDIS_REST_URL` e `UPSTASH_REDIS_REST_TOKEN` validadas no arranque
+- Duas correções de raiz aplicadas nesta sessão (registadas nas decisões técnicas):
+  1. `--env-file=.env` nativo do Node nos scripts `dev`/`start` (o Prisma v6 não carrega .env implicitamente; sem isto o servidor nem arrancava)
+  2. Comparação `String(stored) === value` no health check (o SDK do Upstash faz auto-parse JSON e devolve `number` quando o valor parece numérico)
+- Teste ponta-a-ponta: `{"status":"ok","checks":{"database":"ok","redis":"ok"}}`
+- Commit único: `89ab96f — feat(api): integrate Upstash Redis with health check and load env natively`
+
+**Notas operacionais:**
+- Ficaram no working tree (não commitados) `apps/web/tsconfig.json` (modificado) e `apps/web/next-env.d.ts` (novo) — resíduos de builds anteriores do frontend; sem relação com F0-T6, tratar no início da próxima sessão
+
 ### Sessão #3 — 2 Julho 2026
-
-**Backend (F0-T4) concluída:**
-- Fastify montado com CORS, rate limiting (IP como fallback temporário — TODO F1-T1), logging pino-pretty em dev
-- Módulos de rotas: health, auth, island, cybeing, tournament, marketplace
-- Servidor com type-check + build limpos
-
-**Base de dados (F0-T5) concluída:**
-- Projeto Supabase `cybeings` criado (região West EU / London ou Frankfurt), plano Free
-- Prisma pinado em v6 (v7 tem incompatibilidades abertas com Supabase — decisão registada)
-- Schema com 10 modelos + 10 enums (User, Island, FlagHistory, Cybeing, Listing, Bid, Tournament, TournamentEntry, Rental, Transaction)
-- Primeira migração `20260702191842_init` aplicada com sucesso — todas as tabelas existem na Supabase
-- Cliente Prisma singleton, plugin Fastify, decoração `app.prisma` via fastify-plugin
-- Health check enriquecido: `GET /health` → 200 com `checks.database: "ok"` quando a BD está OK; 503 se cair
-- Teste ponta-a-ponta com curl: `{"status":"ok","service":"cybeings-api","checks":{"database":"ok"}}`
-
-**Migração de ferramenta e infraestrutura:**
-- Passagem da extensão do Chrome para o Claude Code local (macOS, Node 20+, pnpm em /opt/homebrew/bin)
-- Chave SSH `cybeings-sshkey` (ed25519) gerada e registada no GitHub; remote passou a `git@github.com:realbrunoramos/cybeings.git`; push automático sem intervenção manual daqui em diante
-- CLAUDE.md atualizado com Environment notes (pnpm path, Prisma v6 pin)
-
-**Documentação e governança:**
-- `docs/architecture.md` adicionado ao repositório (v1.0, Junho 2026)
-- `docs/PROJECT_INSTRUCTIONS.md` v2 adicionado (versão adaptada ao Claude Code em substituição da v1 da extensão do Chrome)
-- `docs/PROGRESS_REPORT.md` gerado por auditoria (Sessão #2)
-
-**Commits nesta sessão:**
-- `e965ce3` — feat(api): wire Fastify server with CORS, rate limiting and logging
-- `6728b18` — chore: add environment notes to CLAUDE.md
-- `5dfe6b0` — feat(db): pin Prisma v6, add architecture doc, add PROJECT_INSTRUCTIONS v2, init Prisma schema with 10 models
-- `a8d62cc` — feat(api): wire Prisma client into Fastify and expose DB health check
+- F0-T4 concluída (Fastify + módulos + CORS + rate limit + logging)
+- F0-T5 concluída (Supabase + Prisma v6 pinado + 10 modelos + 10 enums + migração `20260702191842_init` + Prisma no Fastify + health check DB)
+- Migração para Claude Code local com SSH permanente (chave `cybeings-sshkey`)
+- `docs/architecture.md` e `docs/PROJECT_INSTRUCTIONS.md` v2 adicionados ao repositório
+- Commits: `e965ce3`, `6728b18`, `5dfe6b0`, `a8d62cc`, `12cbdb9`
 
 ### Sessão #2 — 28 Junho 2026
-- Repositório `realbrunoramos/cybeings` criado (privado)
-- F0-T1 concluída: monorepo pnpm (apps/web, apps/api, packages/shared, packages/ui, packages/contracts)
-- F0-T3 concluída: frontend Next.js 14 + Tailwind + tokens Cybeings + landing page com identidade visual
-- Deploy do frontend na Vercel (Root Directory = apps/web), redeploy automático a cada push
-- Relatório de auditoria em docs/PROGRESS_REPORT.md
+- Repositório privado `realbrunoramos/cybeings` criado
+- F0-T1 concluída (monorepo pnpm)
+- F0-T3 concluída (frontend Next.js 14 + identidade visual)
+- Deploy frontend Vercel (Root Directory = apps/web)
+- `docs/PROGRESS_REPORT.md` gerado por auditoria
 
 ### Sessão #1 — Junho 2026
-- Definição do conceito de produto Cybeings
+- Definição do produto Cybeings
 - Arquitetura técnica completa (docs/architecture.md — só entrou no repo na Sessão #3)
 - Stack decidida
 
@@ -64,18 +55,18 @@ Fundações consolidadas. As três camadas principais (frontend, backend, base d
 
 **Tarefa:** Nada a meio. Sessão fechada em ponto limpo.
 **Branch ativa:** main
-**Próximo passo concreto:** F0-T6 (Upstash Redis) — requer criar conta Upstash antes.
+**Working tree pendente:** `apps/web/tsconfig.json` e `apps/web/next-env.d.ts` — resíduos de builds anteriores; limpar/commitar no início da próxima sessão antes de avançar
 
 ---
 
 ## Próximos Passos (por prioridade)
 
-1. **F0-T6 — Upstash Redis:** criar conta, obter URL/token, adicionar cliente ao backend e ao health check.
-2. **F0-T7 — MongoDB Atlas:** criar conta, cluster, ligação e coleções cybeing_chats / world_events / ai_logs.
-3. **F0-T9 — GitHub Actions CI/CD:** lint + type-check + build em cada PR; deploy automático em push para main.
-4. **F0-T10 (parte 2) — Deploy backend no Railway:** requer conta Railway; variáveis de ambiente e health check ligados.
-5. **F0-T8 — Smart contracts em Sepolia:** requer conta Alchemy + wallet de teste.
-6. **F0-T2 — GitHub Codespaces:** OPCIONAL; com Claude Code local, deixa de ser necessário. Adiar ou saltar.
+1. **Limpar working tree** — decidir se commitamos os regenerados do Next.js ou revertemos (30 segundos)
+2. **F0-T7 — MongoDB Atlas:** criar conta, cluster, ligação e coleções `cybeing_chats` / `world_events` / `ai_logs`; adicionar terceiro check ao `/health`
+3. **F0-T10 (parte 2) — Deploy backend no Railway:** criar conta Railway, configurar variáveis de ambiente, ligar ao repositório
+4. **F0-T9 — GitHub Actions CI/CD:** lint + type-check + build em cada PR; deploy automático em push para main
+5. **F0-T8 — Smart contracts em Sepolia:** requer conta Alchemy + wallet de teste
+6. **F0-T2 — GitHub Codespaces:** OPCIONAL; com Claude Code local, deixa de ser necessário. Adiar ou saltar
 
 ---
 
@@ -91,26 +82,30 @@ Fundações consolidadas. As três camadas principais (frontend, backend, base d
 | Jun 2026 | Biomas: eliminados — foto de capa submetida pelo dono | Mais autêntico, infinitamente variável |
 | Jun 2026 | Token $CBEINGS: Fase 4 | Reduz complexidade inicial, cresce com a comunidade |
 | Jun 2026 | Moeda padrão: USDC | Estabilidade, sem volatilidade para apostas |
-| Jun 2026 | Geração de imagens: Stable Diffusion XL via Replicate | Pay-per-use, qualidade, API simples |
+| Jun 2026 | Geração de imagens: SDXL via Replicate | Pay-per-use, qualidade, API simples |
 | Jun 2026 | Storage NFT: IPFS via Pinata | Descentralizado, permanente, padrão da indústria |
 | Jun 2026 | Storage UI: Cloudinary | Transformações automáticas, moderação, CDN |
 | Jun 2026 | Tailwind v3.4 + tokens em CSS variables | Estável, previsível, fiel ao brandbook |
 | Jun 2026 | Next.js 14.2 + React 18 (App Router) | Versões estáveis, bem suportadas pela Vercel |
 | Jun 2026 | Deploy frontend: Vercel, Root Directory = apps/web | Monorepo: Vercel precisa do path da app |
-| Jul 2026 | Ferramenta de execução: Claude Code local | Compila, testa e faz push antes de commitar; substitui extensão do Chrome |
+| Jul 2026 | Ferramenta de execução: Claude Code local | Compila, testa e faz push antes de commitar |
 | Jul 2026 | Autenticação Git: SSH (chave cybeings-sshkey) | Push automático a partir do Claude Code |
 | Jul 2026 | Prisma pinado em v6 | v7 tem incompatibilidades abertas com Supabase |
-| Jul 2026 | Fastify + fastify-plugin para decoração app.prisma | Padrão do ecossistema Fastify |
+| Jul 2026 | Fastify + fastify-plugin para decoração app.prisma/app.redis | Padrão do ecossistema Fastify |
 | Jul 2026 | Rate limit temporário por IP até SIWE (TODO F1-T1) | Fallback aceite até auth existir |
 | Jul 2026 | Branches: main direto na Fase 0; PRs a partir da Fase 1 | Projeto solo em fundações |
+| Jul 2026 | Cliente Upstash: `@upstash/redis` (REST) em vez de `ioredis` | Serverless-friendly, sem gestão de sockets, recomendação oficial da Upstash |
+| Jul 2026 | Carregamento de .env: flag nativa `--env-file=.env` do Node 20.6+ | Sem dependência de dotenv; carrega antes de qualquer módulo correr |
+| Jul 2026 | Health check: comparar `String(stored) === value` para o Redis | O SDK `@upstash/redis` faz auto-parse JSON e devolve `number` quando o valor parece numérico |
 
 ---
 
 ## Problemas Conhecidos / Blockers
 
 - Nenhum bloqueador ativo.
-- Nota: URL de produção Vercel pode pedir login a terceiros por o repositório ser privado (Deployment Protection). Normal nesta fase.
+- Working tree pendente: `apps/web/tsconfig.json` (modificado) e `apps/web/next-env.d.ts` (novo) — resíduos de builds anteriores; tratar no início da próxima sessão.
 - Nota operacional (macOS): `pnpm` está em `/opt/homebrew/bin`; sessões futuras podem precisar de `export PATH="/opt/homebrew/bin:$PATH"` — registado em CLAUDE.md.
+- URL de produção Vercel pode pedir login a terceiros por o repositório ser privado (Deployment Protection). Normal nesta fase.
 
 ---
 
@@ -119,11 +114,13 @@ Fundações consolidadas. As três camadas principais (frontend, backend, base d
 **Repositório:** github.com/realbrunoramos/cybeings (privado)
 **Branch principal:** main
 **Branch de trabalho atual:** main
-**Git:** SSH (chave cybeings-sshkey); remote git@github.com:realbrunoramos/cybeings.git
+**Git:** SSH (chave cybeings-sshkey); remote `git@github.com:realbrunoramos/cybeings.git`
 **Ferramenta de execução:** Claude Code local (macOS)
-**Deploy frontend:** Vercel — AO VIVO. Root Directory = apps/web. Redeploy automático a cada push.
+**Deploy frontend:** Vercel — AO VIVO. Root Directory = apps/web. Redeploy automático a cada push
 **Deploy backend:** a configurar (Railway) — F0-T10 parte 2
-**Base de dados:** Supabase (projeto cybeings) — schema com 10 tabelas migrado; health check ponta-a-ponta a passar
+**Base de dados relacional:** Supabase — schema com 10 tabelas migrado; health check ponta-a-ponta OK
+**Cache/pub-sub:** Upstash Redis — cliente REST integrado; health check ponta-a-ponta OK
+**Base de dados não estruturada:** MongoDB Atlas — a configurar (F0-T7)
 **Chain ativa:** Sepolia testnet (mudar para mainnet na Fase 2)
 **Contratos deployed:**
 - Island: não deployed ainda
@@ -135,13 +132,13 @@ Fundações consolidadas. As três camadas principais (frontend, backend, base d
 
 ## Credenciais e Acessos (referências, nunca valores reais)
 
-- Variáveis de ambiente: ver .env.example no repo + apps/api/.env local (gitignored)
+- Variáveis de ambiente: ver `.env.example` no repo + `apps/api/.env` local (gitignored)
 - GitHub: realbrunoramos (conta ativa; SSH cybeings-sshkey)
 - Vercel: ligada via GitHub — projeto cybeings AO VIVO
 - Supabase: conta criada, projeto cybeings ativo
+- Upstash: conta criada, base Redis `cybeings` ativa
 - Railway: a criar em railway.app
 - Alchemy: a criar em alchemy.com
-- Upstash: a criar em upstash.com
 - MongoDB Atlas: a criar em mongodb.com/atlas
 - Pinata: a criar em pinata.cloud
 - Cloudinary: a criar em cloudinary.com
