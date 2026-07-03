@@ -44,21 +44,32 @@ async function checkRedis(app: FastifyInstance): Promise<"ok" | "down"> {
   }
 }
 
+async function checkMongo(app: FastifyInstance): Promise<"ok" | "down"> {
+  try {
+    await withTimeout(app.mongoDb.command({ ping: 1 }), "MongoDB");
+    return "ok";
+  } catch (err) {
+    app.log.error({ err }, "MongoDB health check failed");
+    return "down";
+  }
+}
+
 // Liveness endpoint used by Railway and uptime monitors.
 export async function healthRoutes(app: FastifyInstance): Promise<void> {
   app.get("/health", async (_request, reply) => {
-    const [database, redisStatus] = await Promise.all([
+    const [database, redisStatus, mongoStatus] = await Promise.all([
       checkDatabase(app),
       checkRedis(app),
+      checkMongo(app),
     ]);
 
-    const allOk = database === "ok" && redisStatus === "ok";
+    const allOk = database === "ok" && redisStatus === "ok" && mongoStatus === "ok";
 
     const body = {
       status: allOk ? "ok" : "degraded",
       service: "cybeings-api",
       timestamp: new Date().toISOString(),
-      checks: { database, redis: redisStatus },
+      checks: { database, redis: redisStatus, mongo: mongoStatus },
     };
 
     if (!allOk) {
