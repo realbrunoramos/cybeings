@@ -5,6 +5,7 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {
+    "build": "echo \"[shared] no build yet\" && exit 0",
     "lint": "echo \"[shared] no lint yet\"",
     "type-check": "echo \"[shared] no type-check yet\"",
     "test": "echo \"[shared] no tests yet\""

@@ -13,3 +13,6 @@ next-env.d.ts
 
 # Testing / misc
 coverage/
+
+# TypeScript incremental build cache
+*.tsbuildinfo

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "build": "echo \"[ui] no build yet\" && exit 0",
     "lint": "echo \"[ui] no lint yet\"",
     "type-check": "echo \"[ui] no type-check yet\"",
     "test": "echo \"[ui] no tests yet\""
