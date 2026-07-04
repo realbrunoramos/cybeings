@@ -24,6 +24,8 @@ jobs:
           node-version-file: .nvmrc
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
+      - name: Generate Prisma Client
+        run: pnpm --filter @cybeings/api exec prisma generate
       - run: pnpm -r lint
 
   type-check:
@@ -39,6 +41,8 @@ jobs:
           node-version-file: .nvmrc
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
+      - name: Generate Prisma Client
+        run: pnpm --filter @cybeings/api exec prisma generate
       - run: pnpm -r type-check
 
   build:
@@ -54,6 +58,8 @@ jobs:
           node-version-file: .nvmrc
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
+      - name: Generate Prisma Client
+        run: pnpm --filter @cybeings/api exec prisma generate
       - run: pnpm -r build
         env:
           # CI-only dummy values; real secrets are configured per environment.
