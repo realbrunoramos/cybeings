@@ -1,0 +1,12 @@
+{
+  "network": "sepolia",
+  "chainId": 11155111,
+  "deployedAt": "2026-07-09T22:08:26.018Z",
+  "contracts": {
+    "CybeingsIsland": "0x5346c211Cfe160bd556e605Acbb1FEd54D07ad5b",
+    "CybeingsNFT": "0xEaF2CA2d99703c3d0F6A6382362C3428794517B2",
+    "CybeingsFlag": "0x2ADDf54aac353eFdaE9a8E7e7902dB695A89DDaA",
+    "CybeingsMarket": "0x205f700fA48Cc73D50B165ACa2570CA0F65923Ee"
+  },
+  "usdcAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+}
