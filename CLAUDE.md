@@ -78,6 +78,7 @@ docs: update session state — [data] — [resumo em 1 linha]
 - Every command that uses `pnpm` (or `node`, `npx`, `tsc`) must be prefixed with `export PATH="/opt/homebrew/bin:$PATH"`, or chained: `export PATH="/opt/homebrew/bin:$PATH" && pnpm …`
 - Git remote is SSH: `git@github.com:realbrunoramos/cybeings.git` — SSH key `~/.ssh/id_ed25519` is configured and working.
 - Prisma is pinned to v6 (Prisma v7 has known open issues with Supabase). Do not upgrade to v7 without explicit approval.
+- Smart contracts use Hardhat 2 + OpenZeppelin v5.6 + Solidity 0.8.24 with `evmVersion: "cancun"` (required — OZ v5.6 uses the `mcopy` opcode). Sepolia/mainnet are Cancun-enabled, so this is safe to deploy.
 
 ## Referência completa
 
