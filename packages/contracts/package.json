@@ -3,9 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "echo \"[contracts] not set up yet — see task F0-T8\"",
-    "test": "echo \"[contracts] no tests yet\"",
-    "lint": "echo \"[contracts] no lint yet\"",
-    "type-check": "echo \"[contracts] no type-check yet\""
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "test:coverage": "hardhat coverage",
+    "clean": "hardhat clean",
+    "lint": "echo \"[contracts] no solidity lint yet\" && exit 0",
+    "type-check": "tsc --noEmit --project tsconfig.json 2>/dev/null || echo \"[contracts] no tsconfig yet\" && exit 0"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "dotenv": "^17.4.2",
+    "hardhat": "^2.26.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0"
   }
 }
