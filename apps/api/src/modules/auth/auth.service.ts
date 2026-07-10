@@ -6,6 +6,10 @@ const NONCE_PREFIX = "siwe:nonce:";
 const NONCE_TTL_SECONDS = 300; // 5 minutes
 const JWT_EXPIRES_IN = "7d";
 
+// Maximum accepted window between a message's issuedAt and expirationTime.
+// Even if a client signs a message valid far into the future, we reject it.
+const MAX_MESSAGE_VALIDITY_MS = 10 * 60 * 1000; // 10 minutes
+
 /**
  * Minimal surface of the Redis client the auth service relies on. Declaring it
  * as an interface (rather than importing the concrete Upstash type) lets the
@@ -49,8 +53,22 @@ export async function verifySignature(
     throw new AuthError("Invalid or expired nonce");
   }
 
+  // Require an explicit expiration and a sane validity window, independent of
+  // the Redis nonce TTL (defence in depth). siwe only enforces expirationTime
+  // if the message happens to carry one, so we require it here.
+  const { issuedAt, expirationTime } = siweMessage;
+  if (!expirationTime || !issuedAt) {
+    throw new AuthError("Message must define issuedAt and expirationTime");
+  }
+  const validityMs = new Date(expirationTime).getTime() - new Date(issuedAt).getTime();
+  if (!Number.isFinite(validityMs) || validityMs <= 0 || validityMs > MAX_MESSAGE_VALIDITY_MS) {
+    throw new AuthError("Message validity window is invalid or too long");
+  }
+
+  // Bind the signature to our domain (guards cross-domain replay/phishing) and
+  // let siwe enforce expirationTime against the current time.
   const result = await siweMessage.verify(
-    { signature },
+    { signature, domain: env.SIWE_DOMAIN },
     { suppressExceptions: true },
   );
   if (!result.success) {

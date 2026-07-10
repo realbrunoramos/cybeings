@@ -31,17 +31,40 @@ function createFakeStore(): NonceStore & { map: Map<string, string> } {
   };
 }
 
+interface SiweOverrides {
+  domain?: string;
+  // Pass null to omit expirationTime entirely.
+  expirationTime?: string | null;
+  issuedAt?: string;
+}
+
 // Build a SIWE message string signed by the given wallet for a given nonce.
-async function buildSignedSiwe(wallet: ethers.HDNodeWallet, nonce: string) {
-  const siwe = new SiweMessage({
-    domain: "localhost:3000",
+// Defaults produce a valid message: correct domain, issuedAt now,
+// expirationTime 5 minutes out (within the 10-minute cap).
+async function buildSignedSiwe(
+  wallet: ethers.HDNodeWallet,
+  nonce: string,
+  overrides: SiweOverrides = {},
+) {
+  const now = Date.now();
+  const issuedAt = overrides.issuedAt ?? new Date(now).toISOString();
+
+  const fields: Partial<SiweMessage> = {
+    domain: overrides.domain ?? "localhost:3000",
     address: wallet.address,
     statement: "Sign in to Cybeings",
     uri: "http://localhost:3000",
     version: "1",
     chainId: 11155111,
     nonce,
-  });
+    issuedAt,
+  };
+  if (overrides.expirationTime !== null) {
+    fields.expirationTime =
+      overrides.expirationTime ?? new Date(now + 5 * 60 * 1000).toISOString();
+  }
+
+  const siwe = new SiweMessage(fields);
   const message = siwe.prepareMessage();
   const signature = await wallet.signMessage(message);
   return { message, signature };
@@ -100,6 +123,43 @@ describe("auth.service", () => {
     const { message, signature } = await buildSignedSiwe(wallet, "unknownnonce123456");
 
     await expect(verifySignature(store, message, signature)).rejects.toThrow(/nonce/i);
+  });
+
+  it("verifySignature rejects a message signed for a different domain", async () => {
+    const store = createFakeStore();
+    const wallet = ethers.Wallet.createRandom();
+    const nonce = await generateNonce(store);
+    // Signed for evil.com, but our backend expects localhost:3000.
+    const { message, signature } = await buildSignedSiwe(wallet, nonce, {
+      domain: "evil.com",
+    });
+
+    await expect(verifySignature(store, message, signature)).rejects.toBeInstanceOf(AuthError);
+  });
+
+  it("verifySignature rejects a message with no expirationTime", async () => {
+    const store = createFakeStore();
+    const wallet = ethers.Wallet.createRandom();
+    const nonce = await generateNonce(store);
+    const { message, signature } = await buildSignedSiwe(wallet, nonce, {
+      expirationTime: null,
+    });
+
+    await expect(verifySignature(store, message, signature)).rejects.toBeInstanceOf(AuthError);
+  });
+
+  it("verifySignature rejects a message whose validity window is too long", async () => {
+    const store = createFakeStore();
+    const wallet = ethers.Wallet.createRandom();
+    const nonce = await generateNonce(store);
+    const now = Date.now();
+    // issuedAt now, expirationTime 20 minutes out — beyond the 10-minute cap.
+    const { message, signature } = await buildSignedSiwe(wallet, nonce, {
+      issuedAt: new Date(now).toISOString(),
+      expirationTime: new Date(now + 20 * 60 * 1000).toISOString(),
+    });
+
+    await expect(verifySignature(store, message, signature)).rejects.toBeInstanceOf(AuthError);
   });
 
   it("generateJWT + verify round-trip is handled by the middleware test below", () => {
