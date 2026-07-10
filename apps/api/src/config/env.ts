@@ -47,6 +47,14 @@ function requireJwtSecret(name: string): string {
   return value;
 }
 
+function requireNonEmptyEnv(name: string): string {
+  const value = process.env[name];
+  if (value === undefined || value.trim() === "") {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+}
+
 export const env = {
   PORT: parseInt(requireEnv("PORT", "4000"), 10),
   HOST: requireEnv("HOST", "0.0.0.0"),
@@ -56,6 +64,7 @@ export const env = {
   UPSTASH_REDIS_REST_TOKEN: requireUpstashToken("UPSTASH_REDIS_REST_TOKEN"),
   MONGODB_URI: requireMongoUri("MONGODB_URI"),
   JWT_SECRET: requireJwtSecret("JWT_SECRET"),
+  SIWE_DOMAIN: requireNonEmptyEnv("SIWE_DOMAIN"),
 } as const;
 
 export type Env = typeof env;
