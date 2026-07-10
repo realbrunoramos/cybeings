@@ -36,6 +36,17 @@ function requireMongoUri(name: string): string {
   return value;
 }
 
+function requireJwtSecret(name: string): string {
+  const value = process.env[name];
+  if (value === undefined || value.trim() === "") {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  if (value.length < 32) {
+    throw new Error(`${name} must be at least 32 characters long`);
+  }
+  return value;
+}
+
 export const env = {
   PORT: parseInt(requireEnv("PORT", "4000"), 10),
   HOST: requireEnv("HOST", "0.0.0.0"),
@@ -44,6 +55,7 @@ export const env = {
   UPSTASH_REDIS_REST_URL: requireUpstashUrl("UPSTASH_REDIS_REST_URL"),
   UPSTASH_REDIS_REST_TOKEN: requireUpstashToken("UPSTASH_REDIS_REST_TOKEN"),
   MONGODB_URI: requireMongoUri("MONGODB_URI"),
+  JWT_SECRET: requireJwtSecret("JWT_SECRET"),
 } as const;
 
 export type Env = typeof env;
