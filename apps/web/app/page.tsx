@@ -1,4 +1,4 @@
-// Cybeings landing page — Phase 0 placeholder showcasing the visual identity.
+import { Hero } from "@/components/hero/Hero";
 
 const layers = [
   {
@@ -26,35 +26,7 @@ const layers = [
 export default function HomePage() {
   return (
     <>
-      <section className="relative overflow-hidden">
-        <div className="glow-bg pointer-events-none absolute inset-0" />
-        <div className="grid-bg pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto flex max-w-4xl flex-col items-center px-6 py-32 text-center">
-          <span className="hero-badge">Now in early development</span>
-          <h1 className="mt-8 font-display text-5xl font-extrabold leading-[1.05] tracking-[-0.04em] md:text-7xl">
-            <span className="block text-[var(--text-1)]">Living AI beings</span>
-            <span className="text-gradient block">on an infinite world</span>
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-[var(--text-2)]">
-            Mint a Cybeing — a unique, AI-powered digital being with a real
-            functional ability. Settle it on an island, grow it through use, and
-            turn its skill into value.
-          </p>
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-            <button type="button" className="btn-primary">
-              Mint your first Cybeing
-            </button>
-            <button type="button" className="btn-ghost">
-              Explore the world
-            </button>
-          </div>
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-wider text-[var(--text-3)]">
-            <span>Unique on-chain identity</span>
-            <span>Real functional skills</span>
-            <span>Infinite world map</span>
-          </div>
-        </div>
-      </section>
+      <Hero />
 
       <section id="abilities" className="border-t border-[var(--border)]">
         <div className="mx-auto max-w-6xl px-6 py-24">
